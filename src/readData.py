@@ -1,17 +1,19 @@
 import pandas as pd
 
 directory = '/Users/Atlantis/code/Python/MovieRS/Data'
-def read_data():
+
+def read_movie():
     #process the movies.csv
     dataframe = pd.read_csv(directory+'/movies.csv')
     # print(dataframe.dtypes)
-    movies = dataframe.set_index('movieId')['title'].to_dict()
-    # print(movies)
+    return dataframe.set_index('movieId')['title'].to_dict()
 
+def read_data():
+    movies = read_movie()
     #process the ratings/csv
 
     df = pd.read_csv(directory+'/ratings.csv')
-    print(df.dtypes)
+    # print(df.dtypes)
     prefs = {}
     for index, row in df.iterrows():
         prefs.setdefault(str(row['userId']), {})
