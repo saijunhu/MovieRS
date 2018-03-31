@@ -1,9 +1,24 @@
 from math import sqrt
 
-# user te pearson param to evaulate the simarilty of people
+# user te pearson param to evaluate the similarity of people
 from src.readData import *
 
 
+# Choice1: use the Euclidean Distance Score as the similarity index
+def sim_distance(prefs, user1Id, user2Id):
+    # get the commmon list
+    common = {}
+    for item in prefs[user1Id]:
+        if item in prefs[user2Id]:
+            common[item] = 1
+    if len(common) ==0 : return 0
+    # When you writing the list generator, Do not forget write the brace
+    sum_of_squares=sum([pow(prefs[user1Id][item]-prefs[user2Id][item],2)
+                       for item in common])
+    return (1/(1+sqrt(sum_of_squares)))
+
+
+# Choice2: use the Pearson Correlation Score as the similarity index
 def sim_pearson(prefs, user1Id, user2Id):
     # get the common list
     common = {}
@@ -12,7 +27,8 @@ def sim_pearson(prefs, user1Id, user2Id):
             common[item] = 1
 
     # if two people no common rated movie,then return
-    if len(common) == 0:
+    n = len(common)
+    if n == 0:
         return 0
 
     # sum the all prefs
@@ -35,6 +51,7 @@ def sim_pearson(prefs, user1Id, user2Id):
     r = num / den
     return r
 
+# The other alternative similarity index is feasible , such as Jaccard 系数，曼哈顿距离
 
 def top_matches(prefs, userId, n=5, similarity=sim_pearson):
     '''该函数得到与目标用户喜好程度最为相同的n个用户。'''
@@ -44,23 +61,37 @@ def top_matches(prefs, userId, n=5, similarity=sim_pearson):
     return scores[0:n]
 
 
+# Calculate the person similarity advanced, one execute, one shot, improve the efficiency，该函数未使用
+def calculateSimilarityUser(prefs, n=10):
+    result={}
+    for user in prefs:
+        scores = top_matches(prefs, user, n, sim_distance)
+        result[user] = scores
+    return result
+
+
 def get_recommendations(prefs, userId, similarity=sim_pearson):
     """该函数得到推荐的电影列表。"""
     totals = {}
     simSum = {}
     for other in prefs:
+        # Do not compare with yourself
         if other == userId:
             continue
         sim = similarity(prefs, userId, other)
-        # ignore the sum value less than 0
+
+        # ignore the sum value no larger than 0
         if sim <= 0:
             continue
         for item in prefs[other]:
+            # only rate those movies that you haven't watched
             if item not in prefs[userId] or prefs[userId][item] == 0:
                 totals.setdefault(item, 0)
-                # for every item calculate the sim*rating
+                # for every person calculate the ratings * sim
+                # the '+=' is for higher 'for' loop setting, means all other people's score on this item
                 totals[item] += prefs[other][item] * sim
-                # calculate the sim sum
+                # for every item,calculate the sim sum,'+=' is for higher 'for'loop setting ,
+                # means all other people similarity sum,which rated this item
                 simSum.setdefault(item, 0)
                 simSum[item] += sim
     # create the normalized list
@@ -75,6 +106,8 @@ def main():
     # print("the pearson score is: ", end=' ')
     # print(sim_pearson(prefs, 2, 4))
     # print(top_matches(prefs, 2))
-    print(get_recommendations(prefs, '2.0'))
+    print(get_recommendations(prefs, '2.0',sim_distance))
+    print(get_recommendations(prefs, '2.0', sim_pearson))
+
 
 # main()
