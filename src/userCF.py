@@ -106,8 +106,10 @@ def main():
     # print("the pearson score is: ", end=' ')
     # print(sim_pearson(prefs, 2, 4))
     # print(top_matches(prefs, 2))
-    print(get_recommendations(prefs, '2.0',sim_distance))
-    print(get_recommendations(prefs, '2.0', sim_pearson))
+    # result = get_recommendations(prefs, '2.0',sim_pearson)
 
+    result1 = sim_pearson(prefs,'1.0', '6.0')
+    result2 = sim_distance(prefs,'1.0', '6.0')
+    print("'浮点数")
 
 # main()
